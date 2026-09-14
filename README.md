@@ -4,65 +4,65 @@
 
 This repository provides MATLAB analysis scripts, extracted multi-port S-parameter data, and measured phase-noise data for a mm-wave quadrature voltage-controlled oscillator (QVCO).
 
-The main purpose of the repository is to support reproducible analysis of the two quadrature oscillation modes using extracted 9-port S-parameters. The analysis applies two quadrature current excitations,
+The repository is intended to support reproducible analysis of the two quadrature oscillation modes using extracted 9-port S-parameters. The analysis applies two quadrature current excitations,
 
-\[
-i_Q=-j\,i_I
-\]
+$$
+i_Q=-j i_I
+$$
 
 and
 
-\[
-i_Q=+j\,i_I,
-\]
+$$
+i_Q=+j i_I,
+$$
 
 to evaluate the two mode-dependent responses.
 
 The released materials include:
 
-- mode-dependent \(Z_{GS}\) calculation;
-- effective parallel resistance \(R_p\);
-- open-loop \(Q\);
+- mode-dependent $Z_{GS}$ calculation;
+- effective parallel resistance $R_p$;
+- open-loop $Q$;
 - prediction of the two quadrature-mode frequencies;
 - model validation using a reference QVCO dataset;
 - measured phase-noise data across the tuning range.
 
 ---
 
-## Suggested Repository Structure
+## Repository Structure
 
 ```text
 .
 ├── README.md
+├── .gitignore
 │
-├── model/
-│   ├── proposed_qvco/
+├── model_matlab/
+│   ├── proposed_QVCO/
 │   │   ├── calc_zgs.m
 │   │   ├── calc_rp.m
 │   │   ├── calc_open_loop_q.m
 │   │   ├── predict_mode_frequency.m
-│   │   └── sparameters/
-│   │       ├── cs_sweep/
-│   │       └── bank_sweep/
+│   │   ├── QVCO_Mine_SW31_Cs_*.s9p
+│   │   └── QVCO_Mine_wi_var_SW*.s9p
 │   │
 │   └── reference_QVCO_JSSC23_xichen/
-│       ├── validate_model_with_reference_qvco.m
-│       ├── sparameters/
-│       └── results/
+│       ├── validate_model_with_reference_QVCO.m
+│       ├── QVCO_Xichen_Cs_nch_lvt_dnw_*.s9p
+│       └── supporting PDF results
 │
 └── measurement/
     └── phase_noise/
         ├── csv/
+        │   └── PN_AVDD0p60_VG0p50_XCORR1000_SW*.CSV
         └── screenshots/
+            └── PN_AVDD0p60_VG0p50_XCORR1000_SW*.PNG
 ```
-
-The exact folder names may be changed as long as the paths used in the MATLAB scripts are updated consistently.
 
 ---
 
 ## Multi-Port Analysis Method
 
-The extracted network is represented by a 9-port S-parameter file.
+The extracted passive network is represented by a 9-port S-parameter model.
 
 The analysis flow is:
 
@@ -75,16 +75,16 @@ Removal of the real MOS admittance contribution
             ↓
 Construction of the I/Q excitation basis
             ↓
-      i_Q = ±j i_I
+        i_Q = ±j i_I
             ↓
    Two mode-dependent responses
             ↓
  Z_GS / R_p / open-loop Q / mode frequency
 ```
 
-For the two quadrature excitations, the model forms two effective branches that correspond to the two physical quadrature modes.
+For the two quadrature excitations, the model forms two effective branches corresponding to the two physical quadrature modes.
 
-The scripts use the same port mapping and mode-excitation convention throughout the repository.
+The scripts use a consistent port mapping and mode-excitation convention throughout the repository.
 
 ---
 
@@ -92,27 +92,33 @@ The scripts use the same port mapping and mode-excitation convention throughout 
 
 ### `calc_zgs.m`
 
-Calculates the mode-dependent gate-to-source transimpedance \(Z_{GS}\) from the extracted 9-port S-parameters.
+Calculates the mode-dependent gate-to-source transimpedance $Z_{GS}$ from the extracted 9-port S-parameters.
 
-The script evaluates both quadrature branches and plots the corresponding \(Z_{GS}\) response versus frequency.
+The main quantity is
 
-Main quantity:
-
-\[
+$$
 Z_{GS}=\frac{V_{GS}}{I_{DS}}.
-\]
+$$
+
+The script evaluates both quadrature branches and plots the corresponding $Z_{GS}$ response versus frequency.
 
 ---
 
 ### `calc_rp.m`
 
-Calculates the mode-dependent effective parallel resistance \(R_p\) at the corresponding oscillation frequency.
+Calculates the mode-dependent effective parallel resistance $R_p$ at the corresponding oscillation frequency.
 
-The current implementation uses the drain-voltage response under the total quadrature current excitation:
+The implemented quantity is based on the real part of the drain-voltage response under the total quadrature current excitation:
 
-\[
-R_p=\left|\operatorname{Re}\left\{\frac{V_D}{I_{DS}}\right\}\right|.
-\]
+$$
+R_p=
+\left|
+\operatorname{Re}
+\left\{
+\frac{V_D}{I_{DS}}
+\right\}
+\right|.
+$$
 
 The two quadrature branches are evaluated separately.
 
@@ -120,18 +126,19 @@ The two quadrature branches are evaluated separately.
 
 ### `calc_open_loop_q.m`
 
-Calculates the open-loop \(Q\) from the local slope of the effective mode phase around the oscillation frequency.
+Calculates the open-loop $Q$ from the local slope of the effective mode phase around the oscillation frequency.
 
 The implemented definition is
 
-\[
-Q=\frac{f_0}{2}
+$$
+Q=
+\frac{f_0}{2}
 \left|
 \frac{d\phi_K}{df}
 \right|,
-\]
+$$
 
-where \(\phi_K\) is expressed in radians and the derivative is evaluated locally around the corresponding oscillation frequency.
+where $\phi_K$ is expressed in radians and the derivative is evaluated locally around the corresponding oscillation frequency.
 
 ---
 
@@ -141,25 +148,25 @@ Predicts the two quadrature-mode frequencies from the extracted 9-port S-paramet
 
 The effective mode responses are formed as
 
-\[
+$$
 K_+=K_{II}+jK_{IQ},
-\]
+$$
 
 and
 
-\[
+$$
 K_-=K_{II}-jK_{IQ}.
-\]
+$$
 
-The predicted mode frequencies are obtained from the corresponding phase condition and are compared with the simulated oscillation-frequency reference used by the script.
+The predicted mode frequencies are obtained from the corresponding phase condition and are compared with the oscillation-frequency reference used by the script.
 
 ---
 
-### `validate_model_with_reference_qvco.m`
+### `validate_model_with_reference_QVCO.m`
 
 Applies the same multi-port analysis method to a reference QVCO dataset.
 
-This script is intended to demonstrate the behavior of the model on a second design and to compare the calculated mode-dependent quantities with the reference simulation results.
+This script is used to examine the mode-dependent behavior of the reference design and compare the calculated quantities with the corresponding simulation references.
 
 ---
 
@@ -167,51 +174,74 @@ This script is intended to demonstrate the behavior of the model on a second des
 
 The repository contains extracted 9-port Touchstone files (`.s9p`) used by the MATLAB scripts.
 
-Two main sweeps are used:
+### $C_S$ sweep
 
-### \(C_S\) sweep
+Files matching
 
-These files are used to evaluate how the two modes evolve as the source capacitance \(C_S\) changes.
+```text
+QVCO_Mine_SW31_Cs_*.s9p
+```
 
-Typical quantities obtained from this sweep include:
+are used to evaluate how the two modes evolve as the source capacitance $C_S$ changes.
 
-- \(Z_{GS}\);
-- \(R_p\);
-- open-loop \(Q\);
+Typical extracted quantities include:
+
+- $Z_{GS}$;
+- $R_p$;
+- open-loop $Q$;
 - phase shifts;
-- mode transition behavior.
+- mode-transition behavior.
 
 ### Tuning-bank sweep
 
-These files are used to predict the two mode frequencies across the tuning range.
+Files matching
 
-If the S-parameter files are moved into subfolders, update the file paths in the corresponding MATLAB scripts before running them.
+```text
+QVCO_Mine_wi_var_SW*.s9p
+```
+
+are used for mode-frequency prediction across the tuning range.
+
+### Reference-QVCO sweep
+
+Files matching
+
+```text
+QVCO_Xichen_Cs_nch_lvt_dnw_*.s9p
+```
+
+are used for validation of the same analysis framework on the reference QVCO dataset.
 
 ---
 
 ## Measurement Data
 
-Measured phase-noise data are provided as instrument-exported CSV files.
+Measured phase-noise data are provided as instrument-exported CSV files in
 
-Corresponding screenshots may also be included for visual reference.
+```text
+measurement/phase_noise/csv/
+```
 
-The phase-noise dataset covers multiple tuning-bank codes across the oscillator tuning range.
+Corresponding instrument screenshots are provided in
 
-The measurement filenames contain the relevant bias condition and tuning-bank code.
+```text
+measurement/phase_noise/screenshots/
+```
 
-For the released dataset:
+The released dataset covers tuning-bank codes `SW00` through `SW31`.
+
+Measurement condition:
 
 - AVDD = 0.60 V
 - VG = 0.50 V
+- XCORR factor = 1000
 
-The CSV files contain the frequency-offset axis and measured phase-noise values exported from the phase-noise analyzer.
-
-Typical units are:
+Typical data units are:
 
 - frequency offset: Hz;
 - phase noise: dBc/Hz.
 
-The instrument metadata contained in each CSV file should be treated as the authoritative record of the acquisition settings.
+The metadata contained in each CSV file should be treated as the authoritative record of the instrument acquisition settings. The PNG files are included only as visual references; the CSV files should be used for numerical analysis.
 
 ---
 
@@ -222,17 +252,21 @@ The MATLAB scripts require:
 - MATLAB;
 - RF Toolbox, for `sparameters()` and Touchstone-file import.
 
-The scripts were written for direct execution as MATLAB scripts with local helper functions.
+The scripts are written for direct execution as MATLAB scripts with local helper functions.
 
 ---
 
 ## Usage
 
-1. Place the required `.s9p` files in the folder expected by the corresponding script, or update the file paths in the script.
-2. Open MATLAB and set the repository folder as the working directory.
-3. Run the desired script.
+Clone or download the repository, then open MATLAB and set the desired analysis folder as the current working directory.
 
-For example:
+For the proposed QVCO analysis:
+
+```matlab
+cd model_matlab/proposed_QVCO
+```
+
+Run the desired script:
 
 ```matlab
 calc_zgs
@@ -250,7 +284,14 @@ calc_open_loop_q
 predict_mode_frequency
 ```
 
-The scripts generate plots directly in MATLAB.
+For the reference-QVCO validation:
+
+```matlab
+cd model_matlab/reference_QVCO_JSSC23_xichen
+validate_model_with_reference_QVCO
+```
+
+The required `.s9p` files are stored in the same folders as the corresponding scripts.
 
 ---
 
@@ -263,18 +304,18 @@ q = -j
 q = +j
 ```
 
-and are mapped to the two physical quadrature modes according to the mode convention used in each dataset.
+and are mapped to the two physical quadrature modes according to the convention implemented in each script.
 
-The scripts explicitly label the selected and unselected physical modes so that the branch assignment can be checked directly from the source code.
+The selected and unselected branches are explicitly identified in the MATLAB code and generated plots.
 
 ---
 
 ## Reproducibility Notes
 
-- The S-parameter data are the extracted network data used by the released MATLAB scripts.
-- The MATLAB scripts contain the numerical post-processing required to obtain the released model results.
+- The S-parameter files are the extracted network data used by the released MATLAB scripts.
+- The MATLAB scripts contain the numerical post-processing used to obtain the released model results.
 - The phase-noise CSV files are direct instrument exports.
-- Screenshots are provided only as visual references; the CSV files should be used for numerical analysis.
+- The phase-noise screenshots are included only as visual references.
 - No foundry PDK, transistor-level design database, or proprietary process files are included.
 
 ---
