@@ -113,7 +113,7 @@ The implemented quantity is based on the real part of the drain-voltage response
 $$
 R_p=
 \left|
-\operatorname{Re}
+\mathrm{Re}
 \left\{
 \frac{V_D}{I_{DS}}
 \right\}
