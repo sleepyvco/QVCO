@@ -111,13 +111,7 @@ Calculates the mode-dependent effective parallel resistance $R_p$ at the corresp
 The implemented quantity is based on the real part of the drain-voltage response under the total quadrature current excitation:
 
 $$
-R_p=
-\left|
-\mathrm{Re}
-\left\{
-\frac{V_D}{I_{DS}}
-\right\}
-\right|.
+R_p = \lvert \mathrm{Re}\{V_D/I_{DS}\} \rvert
 $$
 
 The two quadrature branches are evaluated separately.
